@@ -10,6 +10,7 @@ class Estado;
 
 void menu();
 void ingresarEstados(vector<Estado>* Estados);
+void ingresarEstadosConBash(vector<Estado> *Estados);
 bool evaluaNombres(vector<string>& nombres, string nombreE);
 void leeEstados(vector<Estado>& Estados);
 void tablaSimbolos(vector<char>* Simbolos);
@@ -51,7 +52,7 @@ int main()
 
                 tablaSimbolos(&Simbolos); // Pregunta por los simbolos a usar y los almacena
                 leeSimbolos(Simbolos); //Muestra los simbolos ingresados
-                
+
                 tablaDeTransiciones(&TablaTrans,Estados,Simbolos);
 
                 dibujarAFN(Estados, TablaTrans);
@@ -60,6 +61,24 @@ int main()
                 break;
 
             case 2:
+                Estados.clear();//-----
+                Simbolos.clear();//----Limpia la Tabla de transiciones, estados y simbolos
+                TablaTrans.clear();//--
+
+                ingresarEstadosConBash(&Estados);// Permite al usuario ingresar los estados del AFD
+                leeEstados(Estados); // Lee todos los estados ingresados por el usuario
+
+                tablaSimbolos(&Simbolos); // Pregunta por los simbolos a usar y los almacena
+                leeSimbolos(Simbolos); //Muestra los simbolos ingresados
+
+                tablaDeTransiciones(&TablaTrans,Estados,Simbolos);
+
+                dibujarAFN(Estados, TablaTrans);
+
+                automataIngresado = true;
+                break;
+
+            case 3:
 
                 if(automataIngresado){
                     cout << endl << "Ingrese la cadena a evaluar: " << endl;
@@ -75,11 +94,11 @@ int main()
                     cout << endl << "\t\tNo hay automata ingresado" << endl;
                 break;
 
-            case 3:
+            case 4:
                 cout << "caso 3";
                 exit(0);
 
-            case 4:
+            case 5:
                 if(automataIngresado){
                     system("shotwell Grafo.png&");
                 }
@@ -95,13 +114,15 @@ int main()
     }while(op!=3);
     return 0;
 }
+
 //--------------------------------------------------------------------------------------------------------
 void menu(){                                          //Imprime el menu en la pantalla
     cout << "\n\t\t AUTOMATA FINITO DETERMINISTA\n\n";
-    cout << "\t 1. Ingresar Automata \n";
-    cout << "\t 2. Verificar palabra              \n";
-    cout << "\t 3. Salir                          \n";
-    cout << "\t 4. Mostrar dibujo del automata\n";
+    cout << "\t 1. Ingresar Automata a mano                 \n";
+    cout << "\t 2. Ingresar Automata con archivo de texto   \n";
+    cout << "\t 3. Verificar palabra                        \n";
+    cout << "\t 4. Salir                                    \n";
+    cout << "\t 5. Mostrar dibujo del automata              \n";
     cout << "\t Ingrese opcion: ";
 }
 
@@ -174,6 +195,78 @@ void ingresarEstados(vector<Estado>* Estados){
     }
     Estados -> push_back(Estado("nulo", 0, 0)); //Ingresa un estado con nombre nulo para estados que no
                                                 // tengan una transicion con un simbolo
+}
+
+void ingresarEstadosConBash(vector<Estado> *Estados) {
+    Estado aux;
+    int noEstados;
+    bool inicial = false, final = false, corroboracion, inicialFlag = false;
+    string nombreEstado, Sinicial, Sfinal;
+    vector<string> nombres;
+    system("HelloWorld.sh");
+
+    cout << "\nCuantos Estados desea ingresar?: "; // Recibe el numero estados
+    cin >> noEstados;
+
+    for (int i = 0; i < noEstados; ++i) {
+        cout << "\tNombre del estado " << i+1 << ": "; // Guarda el nombre del estado
+        cin >> nombreEstado;
+
+        if (evaluaNombres(nombres, nombreEstado) || i == 0) {  //Evalua que no haya nombres repetidos
+            nombres.push_back(nombreEstado);
+            if(!inicialFlag) { //Comprueba si ya existe un estado inicial para no solicitarlo otra vez
+                corroboracion = false; //Bandera que permite saber si se solicita otra vez
+                while (!corroboracion) {//  saber si un estado es inicial en caso de error
+                    cout << "\t\tEs estado inicial? (Y = si, N = no): ";
+                    cin >> Sinicial;
+                    if (Sinicial == "Y" || Sinicial == "y" || Sinicial == "s" || Sinicial == "S") {
+                        inicial = true;
+                        corroboracion = true;
+                        inicialFlag = true;
+                    }
+                    else if (Sinicial == "N" || Sinicial == "n") {
+                        inicial = false;
+                        corroboracion = true;
+                    }
+                    else {
+                        cout << "Error, opcion equivocada!";
+                        corroboracion = false;
+                    }
+                }
+            }
+            else{
+                cout << "\t\tYa existe un estado inicial!" << endl;
+                inicial = false;
+            }
+
+            corroboracion = false;
+
+            while(!corroboracion) {
+                cout << "\t\tEs estado final? (Y = si, N = no): ";
+                cin >> Sfinal;
+                if(Sfinal == "Y" || Sfinal == "y" || Sfinal == "s" || Sfinal == "S") {
+                    final = true;
+                    corroboracion = true;
+                }
+                else if(Sfinal == "N" || Sfinal == "n") {
+                    final = false;
+                    corroboracion = true;
+                }
+                else{
+                    cout << "Error! opcion equivocada!";
+                    corroboracion = false;
+                }
+            }
+            aux = Estado(nombreEstado,inicial,final);
+            Estados->push_back(aux);
+        }
+        else{
+            cout << "Ya existe un estado con el mismo nombre, ingrese otro nombre.";
+            i--;
+        }
+    }
+    Estados -> push_back(Estado("nulo", 0, 0)); //Ingresa un estado con nombre nulo para estados que no
+    // tengan una transicion con un simbolo
 }
 
 bool  evaluaNombres(vector<string>& nombres, string nombreE){
@@ -354,7 +447,7 @@ bool evaluaCadena(vector<Estado>& Estados, vector<char>&simbolos, vector<Transic
         return 0;
 }
 
-void metodoSubconjuntos(vector<Estado>& Estados, vector<Transicion> &Trancisiones, vector<char>&simbolos, EstadoSubconjuntos *subconjuntos){
+/*void metodoSubconjuntos(vector<Estado>& Estados, vector<Transicion> &Trancisiones, vector<char>&simbolos, EstadoSubconjuntos *subconjuntos){
     Estado * aux = NULL;
 
     string stringEstInicial, EstadoSig;
@@ -366,11 +459,11 @@ void metodoSubconjuntos(vector<Estado>& Estados, vector<Transicion> &Trancisione
         }
     }
 
-    cerraduraEpsilon(Trancisiones, aux, subconjuntos);
+    //cerraduraEpsilon(Trancisiones, aux, subconjuntos);
 
-}
+}*/
 
-void cerraduraEpsilon(vector<Transicion> &Trancisiones, Estado * aux, EstadoSubconjuntos *subconjuntos){
+/*void cerraduraEpsilon(vector<Transicion> &Trancisiones, Estado * aux, EstadoSubconjuntos *subconjuntos){
         vector<Estado> auxiliar;
         for (int j = 0; j < Trancisiones.size(); ++j) {
             if(Trancisiones.at(j).getEstado1()->getNombre() == aux->getNombre() && Trancisiones.at(j).getSimbolo() == '~'){
@@ -378,7 +471,7 @@ void cerraduraEpsilon(vector<Transicion> &Trancisiones, Estado * aux, EstadoSubc
                 cerraduraEpsilon(Trancisiones, Trancisiones.at(j).getEstado1(), subconjuntos);
             }
         }
-}
+}*/
 
 void dibujarAFN(vector<Estado>& Estados, vector<Transicion>& Transiciones){
     // open a file in write mode.

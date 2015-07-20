@@ -6,8 +6,8 @@
 
 Transicion::Transicion() {
     setNombre("noname");
-    setEstado1(nullptr);
-    setEstado2(nullptr);
+    setEstado1(NULL);
+    setEstado2(NULL);
 }
 
 Transicion::Transicion(string name, Estado * state1, Estado * state2, char simbol) {
